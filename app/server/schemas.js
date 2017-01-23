@@ -26,6 +26,10 @@ userSchema.pre('save', function(next) {
     })
 })
 
+userSchema.methods.comparePassword = function(password) {
+    return bcrypt.compare(password, this.password)
+}
+
 const User = mongoose.model('User', userSchema)
 
 // Books

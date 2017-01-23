@@ -1,3 +1,4 @@
+const passport = require('passport')
 const User = require('./schemas').User
 const Book = require('./schemas').Book
 
@@ -47,5 +48,9 @@ module.exports = (app) => {
 
             res.json(user)
         })
+    })
+
+    app.post('/api/auth/login', passport.authenticate('local'), (req, res) => {
+        res.json({ message: 'Login successful' })
     })
 }

@@ -16,15 +16,42 @@ mongoose.connect(connectionString)
 mongoose.Promise = global.Promise
 const db = mongoose.connection
 
-passport.use(new LocalStrategy((username, password, done) => {
-    User.findOne({ name: username }, (err, user) => {
-        if (err) { return done(err) }
+passport.use(new LocalStrategy(
+    {
+        usernameField: 'name',
+        passwordField: 'password'
+    },
 
-        if (!user) {
-            return done(null, false, { message: 'Incorrect name' })
-        }
+    (username, password, done) => {
+        User.findOne({ name: username }, (err, user) => {
+            if (err) { return done(err) }
+
+            if (!user) {
+                return done(null, false, { message: 'Incorrect name' })
+            }
+
+            user.comparePassword(password)
+                .then(res => {
+                    if (!res) {
+                        return done(null, false, { message: 'Incorrect password' })
+                    } else {
+                        return done(null, user)
+                    }
+                })
+
+        })
+    }
+))
+
+passport.serializeUser((user, done) => {
+    done(null, user.id)
+})
+
+passport.deserializeUser((id, done) => {
+    User.findById(id, (err, user) => {
+        done(err, user)
     })
-}))
+})
 
 app.use(compression())
 app.use(session({
@@ -36,6 +63,9 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 app.use('/public', express.static(process.cwd() + '/public'))
+
+app.use(passport.initialize())
+app.use(passport.session())
 
 routes(app)
 
