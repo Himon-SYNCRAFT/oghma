@@ -9,6 +9,7 @@ module.exports = (app) => {
     })
 
     app.route('/api/books')
+        .all(isAuthenticated)
         .get((req, res) => {
             Book.find({}, (err, books) => {
                 if (err) throw err
@@ -53,4 +54,52 @@ module.exports = (app) => {
     app.post('/api/auth/login', passport.authenticate('local'), (req, res) => {
         res.json({ message: 'Login successful' })
     })
+
+    app.route('/api/profile')
+        .all(isAuthenticated)
+        .get((req, res) => {
+            User.findById(req.user, (err, user) => {
+                if (err) throw err
+                res.json(user)
+            })
+        })
+        .put((req, res) => {
+            User.findById(req.user, (err, user) => {
+                if (err) throw err
+
+                if (req.body.name) {
+                    user.name = req.body.name
+                }
+
+                if (req.body.password) {
+                    user.password = req.body.password
+                }
+
+                if (req.body.city) {
+                    user.city = req.body.city
+                }
+
+                if (req.body.state) {
+                    user.state = req.body.state
+                }
+
+                if (req.body.first_name) {
+                    user.first_name = req.body.first_name
+                }
+
+                if (req.body.last_name) {
+                    user.last_name = req.body.last_name
+                }
+
+                user.save()
+
+                res.json(user)
+            })
+        })
+}
+
+const isAuthenticated = (req, res, next) => {
+    return next()
+    if (req.isAuthenticated()) return next()
+    res.status(401).end()
 }
