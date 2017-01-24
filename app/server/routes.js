@@ -4,10 +4,6 @@ const Book = require('./schemas').Book
 
 
 module.exports = (app) => {
-    app.get('/', (req, res) => {
-        res.send('Hello World')
-    })
-
     app.route('/api/books')
         .all(isAuthenticated)
         .get((req, res) => {
@@ -96,10 +92,22 @@ module.exports = (app) => {
                 res.json(user)
             })
         })
+
+    app.route('/api*')
+        .get(abort404)
+
+    app.route('*')
+        .get((req, res) => {
+            res.sendFile(process.cwd() + '/public/index.html')
+        })
 }
 
 const isAuthenticated = (req, res, next) => {
     return next()
     if (req.isAuthenticated()) return next()
     res.status(401).end()
+}
+
+const abort404 = (req, res, next) => {
+    res.status(404).end()
 }
