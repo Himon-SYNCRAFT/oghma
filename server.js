@@ -10,12 +10,19 @@ const routes = require('./app/server/routes')
 
 const app = express()
 const port = process.env.PORT || 3000
-const connectionString = 'mongodb://tutorial:tutorial@ds151137.mlab.com:51137/clementine'
 
-mongoose.connect(connectionString)
+// Mongoose configuration
+const connectionString = 'mongodb://tutorial:tutorial@ds151137.mlab.com:51137/clementine'
+const options = {
+    server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } },
+    replset: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } }
+}
+mongoose.connect(connectionString, options)
 mongoose.Promise = global.Promise
 const db = mongoose.connection
+db.on('error', console.error.bind(console, 'Connection Error:'))
 
+// Passport configuration
 passport.use(new LocalStrategy(
     {
         usernameField: 'name',
@@ -53,6 +60,7 @@ passport.deserializeUser((id, done) => {
     })
 })
 
+// App configuration
 app.use(compression())
 app.use(session({
     secret: '$2a$12$2Z.wdo.8ytoNn6b5faNAt.ywUFo5g2BmbS2FBJAUbg2iUWJc7li9q',
@@ -69,6 +77,8 @@ app.use(passport.session())
 
 routes(app)
 
-app.listen(port, () => {
-    console.log('App start at port ' + port)
+db.once('open', () => {
+    app.listen(port, () => {
+        console.log('App start at port ' + port)
+    })
 })
