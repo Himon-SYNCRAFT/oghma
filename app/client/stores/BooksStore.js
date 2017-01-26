@@ -12,6 +12,10 @@ const BooksStore = assign({}, EventEmitter.prototype, {
         return _books
     },
 
+    one: (id) => {
+        return _books.find(book => book._id = id)
+    },
+
     addChangeListener: function(callback) {
         this.on(CHANGE, callback)
     },

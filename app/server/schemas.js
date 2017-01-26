@@ -36,6 +36,8 @@ const User = mongoose.model('User', userSchema)
 const bookSchema = new Schema({
     name: { type: String, required: true },
     frontCover: String,
+    description: String,
+    isbn: { type: String, required: true, unique: true }
 })
 
 const Book = mongoose.model('Book', bookSchema)
