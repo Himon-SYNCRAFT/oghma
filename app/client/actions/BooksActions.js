@@ -12,6 +12,23 @@ module.exports = {
                     data: res.data
                 })
             })
+            .catch(err => {
+                if (err.response) {
+                    switch (err.response.status) {
+                        case 401:
+                            Dispatcher.dispatch({
+                                actionType: constants.UNAUTHORIZED,
+                                data: err.response.data
+                            })
+                            break;
+
+                        default:
+                            console.log(err.response.data);
+                    }
+                } else {
+                    console.log('Error', error.message)
+                }
+            })
     },
 
     one: (id) => {
@@ -22,6 +39,23 @@ module.exports = {
                     data: res.data
                 })
             })
+            .catch(err => {
+                if (err.response) {
+                    switch (err.response.status) {
+                        case 401:
+                            Dispatcher.dispatch({
+                                actionType: constants.UNAUTHORIZED,
+                                data: err.response.data
+                            })
+                            break;
+
+                        default:
+                            console.log(err.response.data);
+                    }
+                } else {
+                    console.log('Error', error.message)
+                }
+            })
     },
 
     create: (data) => {
@@ -31,6 +65,23 @@ module.exports = {
                     actionType: constants.BOOKS_CREATE,
                     data: res.data
                 })
+            })
+            .catch(err => {
+                if (err.response) {
+                    switch (err.response.status) {
+                        case 401:
+                            Dispatcher.dispatch({
+                                actionType: constants.UNAUTHORIZED,
+                                data: err.response.data
+                            })
+                            break;
+
+                        default:
+                            console.log(err.response.data);
+                    }
+                } else {
+                    console.log('Error', error.message)
+                }
             })
     },
 };

@@ -1,26 +1,48 @@
 const React = require('react')
-const AuthActions = require('../actions/AuthActions')
+const ProfileActions = require('../actions/ProfileActions')
+const ProfileStore = require('../stores/ProfileStore')
 
 
-class RegisterForm extends React.Component {
+class ProfileEdit extends React.Component {
     constructor(props) {
         super(props)
+
         this.state = {
-            name: "",
-            password: "",
-            firstName: "",
-            lastName: "",
-            city: "",
-            state: "",
+            name: '',
+            firstName: '',
+            lastName: '',
+            city: '',
+            state: '',
         }
 
+        this.onChange = this.onChange.bind(this)
         this.onSubmit = this.onSubmit.bind(this)
         this.handleName = this.handleName.bind(this)
-        this.handlePassword = this.handlePassword.bind(this)
         this.handleFirstName = this.handleFirstName.bind(this)
         this.handleLastName = this.handleLastName.bind(this)
         this.handleCity = this.handleCity.bind(this)
         this.handleState = this.handleState.bind(this)
+    }
+
+    componentDidMount() {
+        ProfileStore.addChangeListener(this.onChange)
+        ProfileActions.get()
+    }
+
+    componentWillUnmount() {
+        ProfileStore.removeChangeListener(this.onChange)
+    }
+
+    onChange() {
+        const user = ProfileStore.get()
+
+        this.setState({
+            name: user.name || '',
+            firstName: user.first_name || '',
+            lastName: user.last_name || '',
+            city: user.city || '',
+            state: user.state || '',
+        })
     }
 
     onSubmit(event) {
@@ -28,24 +50,18 @@ class RegisterForm extends React.Component {
 
         let user = {
             name: this.state.name,
-            password: this.state.password,
             first_name: this.state.firstName,
             last_name: this.state.lastName,
             city: this.state.city,
             state: this.state.state,
         }
 
-        AuthActions.register(user)
+        ProfileActions.update(user)
     }
 
     handleName(event) {
         const name = event.target.value
         this.setState({ name })
-    }
-
-    handlePassword(event) {
-        const password = event.target.value
-        this.setState({ password })
     }
 
     handleFirstName(event) {
@@ -67,17 +83,13 @@ class RegisterForm extends React.Component {
         const state = event.target.value
         this.setState({ state })
     }
-
     render() {
+
         return (
             <form action="" method="post" onSubmit={this.onSubmit}>
                 <div className="form-group">
                     <label htmlFor="name">Name</label>
                     <input id="name" name="name" className="form-control" value={this.state.name} onChange={this.handleName} />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="password">Password</label>
-                    <input id="password" name="password" className="form-control" type="password" value={this.state.password} onChange={this.handlePassword} />
                 </div>
                 <div className="form-group">
                     <label htmlFor="first_name">First name</label>
@@ -102,4 +114,4 @@ class RegisterForm extends React.Component {
 }
 
 
-module.exports = RegisterForm
+module.exports = ProfileEdit

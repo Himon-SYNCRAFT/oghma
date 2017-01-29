@@ -1,6 +1,6 @@
 const React = require('react')
-const UserProfileActions = require('../actions/UserProfileActions')
-const UserProfileStore = require('../stores/UserProfileStore')
+const AuthActions = require('../actions/AuthActions')
+const AuthStore = require('../stores/AuthStore')
 
 
 class LoginForm extends React.Component {
@@ -23,7 +23,7 @@ class LoginForm extends React.Component {
             password: this.state.password
         }
 
-        UserProfileActions.logIn(credentials)
+        AuthActions.logIn(credentials)
     }
 
     handleName(event) {

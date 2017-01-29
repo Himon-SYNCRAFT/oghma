@@ -44,7 +44,8 @@ const bookSchema = new Schema({
     name: { type: String, required: true },
     frontCover: String,
     description: String,
-    isbn: { type: String, required: true, unique: true }
+    isbn: { type: String, required: true, unique: true },
+    owners: [String],
 })
 
 const Book = mongoose.model('Book', bookSchema)

@@ -1,7 +1,8 @@
 const React = require('react')
 const Link = require('react-router').Link
-const UserProfileStore = require('../stores/UserProfileStore')
-const UserProfileActions = require('../actions/UserProfileActions')
+const AuthStore = require('../stores/AuthStore')
+const ErrorStore = require('../stores/ErrorStore')
+const AuthActions = require('../actions/AuthActions')
 const browserHistory = require('react-router').browserHistory
 
 
@@ -18,27 +19,34 @@ class App extends React.Component {
     }
 
     componentDidMount() {
-        UserProfileStore.addLogInListener(this.onLogIn)
-        UserProfileStore.addLogOutListener(this.onLogOut)
+        AuthStore.addLogInListener(this.onLogIn)
+        AuthStore.addLogOutListener(this.onLogOut)
+        ErrorStore.addUnauthorizedListener(this.onUnauthorized)
 
-        const isLogged = UserProfileStore.isLogged()
+        const isLogged = AuthStore.isLogged()
 
         if (isLogged) {
             this.setState({
-                user: UserProfileStore.get(),
+                user: AuthStore.get(),
                 isLogged
             })
         }
     }
 
     componentWillUnmount() {
-        UserProfileStore.removeLogInListener(this.onLogIn)
-        UserProfileStore.removeLogOutListener(this.onLogOut)
+        AuthStore.removeLogInListener(this.onLogIn)
+        AuthStore.removeLogOutListener(this.onLogOut)
+        ErrorStore.removeUnauthorizedListener(this.onUnauthorized)
+    }
+
+    onUnauthorized() {
+        browserHistory.push('/auth/login')
     }
 
     onLogIn() {
-        const user = UserProfileStore.get()
+        const user = AuthStore.get()
         this.setState({ user, isLogged: true })
+        browserHistory.push('/')
     }
 
     onLogOut() {
@@ -65,7 +73,7 @@ class TopMenu extends React.Component {
 
     onClickLogOut(event) {
         event.preventDefault()
-        UserProfileActions.logOut()
+        AuthActions.logOut()
         browserHistory.push('/')
     }
 

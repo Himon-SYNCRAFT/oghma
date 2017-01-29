@@ -30,16 +30,45 @@ module.exports = (app) => {
             })
         })
 
-    app.get('/api/book/:id', isAuthenticated, (req, res) => {
-        Book.findById(req.params.id, (err, book) => {
-            if (err) throw err
-            else if (!book) {
-                return res.status(404).end()
-            } else {
-                res.json(book)
-            }
+    app.route('/api/book/:id')
+        .all(isAuthenticated)
+        .get((req, res) => {
+            Book.findById(req.params.id, (err, book) => {
+                if (err) throw err
+                else if (!book) {
+                    return res.status(404).end()
+                } else {
+                    res.json(book)
+                }
+            })
         })
-    })
+        .put((req, res) => {
+            const bookId = req.params.id
+            const userId = req.body.id
+
+            User.findById(userId, (err, user) => {
+                if (err) throw err
+                else if (!user) {
+                    res.status(400).json({ message: 'User not found' })
+                } else {
+                    Book.findById(bookId, (err, book) => {
+                        if (err) throw err
+                        else if (!book) {
+                            res.status(404).end()
+                        } else {
+                            book.owners.push(userId)
+                            book.save(err => {
+                                if (err) {
+                                    res.status(400).json(err)
+                                } else {
+                                    res.json(book)
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+        })
 
     app.post('/api/auth/register', (req, res) => {
         const name = req.body.name
@@ -73,14 +102,14 @@ module.exports = (app) => {
     })
 
     app.get('/api/auth/logout', (req, res) => {
-        req.logout()
+        req.session.destroy()
         res.end()
     })
 
     app.route('/api/profile')
         .all(isAuthenticated)
         .get((req, res) => {
-            User.findById(req.user, (err, user) => {
+            User.findById(req.user._id, (err, user) => {
                 if (err) throw err
                 res.json(user)
             })
@@ -119,6 +148,16 @@ module.exports = (app) => {
             })
         })
 
+    app.get('/api/profile/books', isAuthenticated, (req, res) => {
+        const userId = req.user._id
+        Book.find({ owners: userId }, (err, docs) => {
+            if (err) throw err
+            else {
+                res.json(docs)
+            }
+        })
+    })
+
     app.route('/api*')
         .get(abort404)
 
@@ -129,7 +168,6 @@ module.exports = (app) => {
 }
 
 const isAuthenticated = (req, res, next) => {
-    return next()
     if (req.isAuthenticated()) return next()
     res.status(401).end()
 }
