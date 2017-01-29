@@ -2,6 +2,7 @@ const React = require('react')
 const Link = require('react-router').Link
 const UserProfileStore = require('../stores/UserProfileStore')
 const UserProfileActions = require('../actions/UserProfileActions')
+const browserHistory = require('react-router').browserHistory
 
 
 class App extends React.Component {
@@ -14,7 +15,6 @@ class App extends React.Component {
 
         this.onLogIn = this.onLogIn.bind(this)
         this.onLogOut = this.onLogOut.bind(this)
-        this.onClickLogOut = this.onClickLogOut.bind(this)
     }
 
     componentDidMount() {
@@ -45,10 +45,6 @@ class App extends React.Component {
         this.setState({ user: {}, isLogged: false })
     }
 
-    onClickLogOut(event) {
-        event.preventDefault()
-        UserProfileActions.logOut()
-    }
 
     render() {
         return (
@@ -63,6 +59,14 @@ class App extends React.Component {
 class TopMenu extends React.Component {
     constructor(props) {
         super(props)
+
+        this.onClickLogOut = this.onClickLogOut.bind(this)
+    }
+
+    onClickLogOut(event) {
+        event.preventDefault()
+        UserProfileActions.logOut()
+        browserHistory.push('/')
     }
 
     render() {
@@ -76,7 +80,7 @@ class TopMenu extends React.Component {
                         <li><Link to="/books/add">Add New Book</Link></li>
                     </ul>
                     <ul className="nav navbar-nav navbar-right">
-                        <li><a onClick={ this.onClickLogOut }>Log Out</a></li>
+                        <li><a href="#" onClick={ this.onClickLogOut }>Log Out</a></li>
                         <li><Link to="/profile">{ user.name }</Link></li>
                     </ul>
                 </div>

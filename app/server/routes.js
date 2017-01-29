@@ -72,6 +72,11 @@ module.exports = (app) => {
         res.json(req.user)
     })
 
+    app.get('/api/auth/logout', (req, res) => {
+        req.logout()
+        res.end()
+    })
+
     app.route('/api/profile')
         .all(isAuthenticated)
         .get((req, res) => {
