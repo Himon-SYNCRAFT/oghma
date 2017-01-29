@@ -15,7 +15,9 @@ module.exports = (app) => {
         .post((req, res) => {
             const book = new Book({
                 name: req.body.name,
-                frontCover: req.body.frontCover
+                frontCover: req.body.frontCover,
+                isbn: req.body.isbn,
+                description: req.body.description
             })
 
             book.save(err => {
@@ -28,13 +30,32 @@ module.exports = (app) => {
             })
         })
 
+    app.get('/api/book/:id', isAuthenticated, (req, res) => {
+        Book.findById(req.params.id, (err, book) => {
+            if (err) throw err
+            else if (!book) {
+                return res.status(404).end()
+            } else {
+                res.json(book)
+            }
+        })
+    })
+
     app.post('/api/auth/register', (req, res) => {
-        const username = req.body.name
+        const name = req.body.name
         const password = req.body.password
+        const city = req.body.city
+        const state = req.body.state
+        const first_name = req.body.first_name
+        const last_name = req.body.last_name
 
         user = new User({
-            name: username,
-            password
+            name,
+            password,
+            city,
+            state,
+            first_name,
+            last_name
         })
 
         user.save(err => {
@@ -48,7 +69,7 @@ module.exports = (app) => {
     })
 
     app.post('/api/auth/login', passport.authenticate('local'), (req, res) => {
-        res.json({ message: 'Login successful' })
+        res.json(req.user)
     })
 
     app.route('/api/profile')

@@ -1,5 +1,6 @@
 const React = require('react')
 const BooksStore = require('../stores/BooksStore')
+const BooksActions = require('../actions/BooksActions')
 
 
 class BookDetails extends React.Component {
@@ -12,7 +13,7 @@ class BookDetails extends React.Component {
 
     componentDidMount() {
         BooksStore.addChangeListener(this.onChange)
-        this.onChange()
+        BooksActions.one(this.props.params.id)
     }
 
     componentWillUnmount() {
@@ -34,8 +35,9 @@ class BookDetails extends React.Component {
         return (
             <div>
                 <h2>{ name }</h2>
-                <p>{ frontCover }</p>
-                <p>{ isbn }</p>
+                <img src={ frontCover } />
+                <p>ISBN: { isbn }</p>
+                <h3>Description</h3>
                 <p>{ description }</p>
             </div>
         )

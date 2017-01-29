@@ -1,5 +1,5 @@
 const constants = require('../constants/Constants')
-const Dispatcher = require('../dispatcher/Dispatcher')
+const Dispatcher = require('../Dispatcher')
 const EventEmitter = require('events').EventEmitter
 const assign = require('object-assign')
 
@@ -13,7 +13,7 @@ const BooksStore = assign({}, EventEmitter.prototype, {
     },
 
     one: (id) => {
-        return _books.find(book => book._id = id)
+        return _books.find(book => book._id == id)
     },
 
     addChangeListener: function(callback) {
@@ -33,6 +33,19 @@ Dispatcher.register(action => {
             break;
 
         case constants.BOOKS_CREATE:
+            BooksStore.emit(CHANGE)
+            break;
+
+        case constants.BOOKS_GET_BY_ID:
+            const book = action.data
+            const bookIndex = _books.findIndex(element => element._id == book._id)
+
+            if (bookIndex === -1) {
+                _books.push(book)
+            } else {
+                assign(_books[bookIndex], book)
+            }
+
             BooksStore.emit(CHANGE)
             break;
     }

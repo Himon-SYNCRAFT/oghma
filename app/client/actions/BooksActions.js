@@ -1,4 +1,4 @@
-const Dispatcher = require('../dispatcher/Dispatcher')
+const Dispatcher = require('../Dispatcher')
 const constants = require('../constants/Constants')
 const Api = require('../Api')
 
@@ -9,6 +9,16 @@ module.exports = {
             .then(res => {
                 Dispatcher.dispatch({
                     actionType: constants.BOOKS_GET_ALL,
+                    data: res.data
+                })
+            })
+    },
+
+    one: (id) => {
+        Api.books.one(id)
+            .then(res => {
+                Dispatcher.dispatch({
+                    actionType: constants.BOOKS_GET_BY_ID,
                     data: res.data
                 })
             })

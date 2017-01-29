@@ -44,6 +44,13 @@ class BookCreationForm extends React.Component {
     handleSubmit(event) {
         event.preventDefault()
 
+        BooksActions.create({
+            name: this.state.name,
+            description: this.state.description,
+            isbn: this.state.isbn,
+            frontCover: this.state.imgUrl
+        })
+
         const clear = {
             name: "",
             imgUrl: "",
@@ -51,7 +58,7 @@ class BookCreationForm extends React.Component {
             description: "",
         }
 
-        this.setState(clear)
+        // this.setState(clear)
     }
 
     render() {
