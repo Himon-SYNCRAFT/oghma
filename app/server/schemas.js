@@ -3,6 +3,13 @@ const Schema = mongoose.Schema
 const bcrypt = require('bcrypt')
 const SALT_ROUNDS = 10
 
+const tradeStates = {
+    OFFERED: 'offered',
+    ACCEPTED: 'accepted',
+    COMPLETED: 'completed',
+    CANCELED: 'canceled',
+}
+
 // Users
 const userSchema = new Schema({
     name: { type: String, required: true, unique: true },
@@ -50,7 +57,45 @@ const bookSchema = new Schema({
 
 const Book = mongoose.model('Book', bookSchema)
 
+// Trades
+const tradeSchema = new Schema({
+    participantFrom: {
+        user: { type: Schema.Types.ObjectId, required: true },
+        book: { type: Schema.Types.ObjectId },
+        accepted: { type: Boolean, default: false },
+        done: { type: Boolean, default: false },
+    },
+    participantTo: {
+        user: { type: Schema.Types.ObjectId, required: true },
+        book: { type: Schema.Types.ObjectId, required: true },
+        accepted: { type: Boolean, default: false },
+        done: { type: Boolean, default: false },
+    },
+    canceled: { type: Boolean, default: false }
+})
+
+tradeSchema.virtual('status').get(() => {
+    let status = tradeStates.OFFERED
+
+    if (this.participantFrom.accepted && this.participantTo.accepted) {
+        status = tradeStates.ACCEPTED
+    } else if (this.participantFrom.done && this.participantTo.done) {
+        status = tradeStates.COMPLETED
+    } else if (this.canceled) {
+        status = tradeStates.CANCELED
+    }
+
+    return status
+})
+
+tradeSchema.set('toJSON', {
+    virtuals: true,
+})
+
+const Trade = mongoose.model('Trade', tradeSchema)
+
 module.exports = {
     User,
     Book,
+    Trade
 }
