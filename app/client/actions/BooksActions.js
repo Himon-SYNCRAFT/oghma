@@ -1,5 +1,11 @@
 const Dispatcher = require('../Dispatcher')
-const constants = require('../constants/Constants')
+const UNAUTHORIZED = require('../constants/Constants').UNAUTHORIZED
+const BOOKS_GET_ALL = require('../constants/Constants').BOOKS_GET_ALL
+const BOOKS_GET_BY_ID = require('../constants/Constants').BOOKS_GET_BY_ID
+const BOOKS_CREATE = require('../constants/Constants').BOOKS_CREATE
+const BOOKS_ADD_TO_USER_SHELF = require('../constants/Constants').BOOKS_ADD_TO_USER_SHELF
+const BOOKS_REMOVE_FROM_USER_SHELF = require('../constants/Constants').BOOKS_REMOVE_FROM_USER_SHELF
+const BOOKS_GET_USER_BOOKS = require('../constants/Constants').BOOKS_GET_USER_BOOKS
 const Api = require('../Api')
 
 
@@ -8,7 +14,7 @@ module.exports = {
         Api.books.all()
             .then(res => {
                 Dispatcher.dispatch({
-                    actionType: constants.BOOKS_GET_ALL,
+                    actionType: BOOKS_GET_ALL,
                     data: res.data
                 })
             })
@@ -17,7 +23,7 @@ module.exports = {
                     switch (err.response.status) {
                         case 401:
                             Dispatcher.dispatch({
-                                actionType: constants.UNAUTHORIZED,
+                                actionType: UNAUTHORIZED,
                                 data: err.response.data
                             })
                             break;
@@ -26,7 +32,7 @@ module.exports = {
                             console.log(err.response.data);
                     }
                 } else {
-                    console.log('Error', error.message)
+                    console.log('Error', err.message)
                 }
             })
     },
@@ -35,7 +41,7 @@ module.exports = {
         Api.books.one(id)
             .then(res => {
                 Dispatcher.dispatch({
-                    actionType: constants.BOOKS_GET_BY_ID,
+                    actionType: BOOKS_GET_BY_ID,
                     data: res.data
                 })
             })
@@ -44,7 +50,7 @@ module.exports = {
                     switch (err.response.status) {
                         case 401:
                             Dispatcher.dispatch({
-                                actionType: constants.UNAUTHORIZED,
+                                actionType: UNAUTHORIZED,
                                 data: err.response.data
                             })
                             break;
@@ -53,7 +59,7 @@ module.exports = {
                             console.log(err.response.data);
                     }
                 } else {
-                    console.log('Error', error.message)
+                    console.log('Error', err.message)
                 }
             })
     },
@@ -62,7 +68,7 @@ module.exports = {
         Api.books.create(data)
             .then(res => {
                 Dispatcher.dispatch({
-                    actionType: constants.BOOKS_CREATE,
+                    actionType: BOOKS_CREATE,
                     data: res.data
                 })
             })
@@ -71,7 +77,7 @@ module.exports = {
                     switch (err.response.status) {
                         case 401:
                             Dispatcher.dispatch({
-                                actionType: constants.UNAUTHORIZED,
+                                actionType: UNAUTHORIZED,
                                 data: err.response.data
                             })
                             break;
@@ -80,7 +86,88 @@ module.exports = {
                             console.log(err.response.data);
                     }
                 } else {
-                    console.log('Error', error.message)
+                    console.log('Error', err.message)
+                }
+            })
+    },
+
+    addBookToShelf: (bookId) => {
+        Api.books.addBookToShelf(bookId)
+            .then(res => {
+                Dispatcher.dispatch({
+                    actionType: BOOKS_ADD_TO_USER_SHELF,
+                    data: res.data
+                })
+            })
+            .catch(err => {
+                if (err.response) {
+                    switch (err.response.status) {
+                        case 401:
+                            Dispatcher.dispatch({
+                                actionType: UNAUTHORIZED,
+                                data: err.response.data
+                            })
+                            break;
+
+                        default:
+                            console.log(err.response.data);
+                    }
+                } else {
+                    console.log('Error', err.message)
+                }
+            })
+    },
+
+    removeBookFromShelf: (bookId) => {
+        Api.books.removeBookFromShelf(bookId)
+            .then(res => {
+                Dispatcher.dispatch({
+                    actionType: BOOKS_REMOVE_FROM_USER_SHELF,
+                    data: res.data
+                })
+            })
+            .catch(err => {
+                if (err.response) {
+                    switch (err.response.status) {
+                        case 401:
+                            Dispatcher.dispatch({
+                                actionType: UNAUTHORIZED,
+                                data: err.response.data
+                            })
+                            break;
+
+                        default:
+                            console.log(err.response.data);
+                    }
+                } else {
+                    console.log('Error', err.message)
+                }
+            })
+    },
+
+    getUserBooks: () => {
+        Api.books.getUserBooks()
+            .then(res => {
+                Dispatcher.dispatch({
+                    actionType: BOOKS_GET_USER_BOOKS,
+                    data: res.data
+                })
+            })
+            .catch(err => {
+                if (err.response) {
+                    switch (err.response.status) {
+                        case 401:
+                            Dispatcher.dispatch({
+                                actionType: UNAUTHORIZED,
+                                data: err.response.data
+                            })
+                            break;
+
+                        default:
+                            console.log(err.response.data);
+                    }
+                } else {
+                    console.log('Error', err.message)
                 }
             })
     },

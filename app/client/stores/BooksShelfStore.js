@@ -1,8 +1,5 @@
-const BOOKS_GET_ALL = require('../constants/Constants').BOOKS_GET_ALL
-const BOOKS_GET_BY_ID = require('../constants/Constants').BOOKS_GET_BY_ID
-const BOOKS_CREATE = require('../constants/Constants').BOOKS_CREATE
 const BOOKS_ADD_TO_USER_SHELF = require('../constants/Constants').BOOKS_ADD_TO_USER_SHELF
-const BOOKS_REMOVE_FROM_USER_SHELF = require('../constants/Constants').BOOKS_REMOVE_FROM_USER_SHELF
+const BOOKS_GET_USER_BOOKS = require('../constants/Constants').BOOKS_GET_USER_BOOKS
 const Dispatcher = require('../Dispatcher')
 const EventEmitter = require('events').EventEmitter
 
@@ -10,7 +7,7 @@ const EventEmitter = require('events').EventEmitter
 const CHANGE = 'CHANGE BOOKS'
 let _books = []
 
-const BooksStore = Object.assign({}, EventEmitter.prototype, {
+const BooksShelfStore = Object.assign({}, EventEmitter.prototype, {
     all: () => {
         return _books
     },
@@ -30,18 +27,12 @@ const BooksStore = Object.assign({}, EventEmitter.prototype, {
 
 Dispatcher.register(action => {
     switch (action.actionType) {
-        case BOOKS_GET_ALL:
+        case BOOKS_GET_USER_BOOKS:
             _books = action.data
-            BooksStore.emit(CHANGE)
+            BooksShelfStore.emit(CHANGE)
             break;
 
-        case BOOKS_CREATE:
-            BooksStore.emit(CHANGE)
-            break;
-
-        case BOOKS_GET_BY_ID:
         case BOOKS_ADD_TO_USER_SHELF:
-        case BOOKS_REMOVE_FROM_USER_SHELF:
             const book = action.data
             const bookIndex = _books.findIndex(element => element._id == book._id)
 
@@ -51,10 +42,11 @@ Dispatcher.register(action => {
                 Object.assign(_books[bookIndex], book)
             }
 
-            BooksStore.emit(CHANGE)
+            BooksShelfStore.emit(CHANGE)
             break;
     }
 })
 
 
-module.exports = BooksStore
+module.exports = BooksShelfStore
+

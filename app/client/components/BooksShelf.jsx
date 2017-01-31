@@ -1,10 +1,10 @@
 const React = require('react')
 const Link = require('react-router').Link
 const BooksActions = require('../actions/BooksActions')
-const BooksStore = require('../stores/BooksStore')
+const BooksShelfStore = require('../stores/BooksShelfStore')
 
 
-class BooksList extends React.Component {
+class BooksShelf extends React.Component {
     constructor(props) {
         super(props)
 
@@ -16,16 +16,16 @@ class BooksList extends React.Component {
     }
 
     componentDidMount() {
-        BooksStore.addChangeListener(this.onChange)
-        BooksActions.all()
+        BooksShelfStore.addChangeListener(this.onChange)
+        BooksActions.getUserBooks()
     }
 
     componentWillUnmount() {
-        BooksStore.removeChangeListener(this.onChange)
+        BooksShelfStore.removeChangeListener(this.onChange)
     }
 
     onChange() {
-        const books = BooksStore.all()
+        const books = BooksShelfStore.all()
 
         this.setState({
             books
@@ -85,4 +85,5 @@ class BooksListItem extends React.Component {
 }
 
 
-module.exports = BooksList
+module.exports = BooksShelf
+

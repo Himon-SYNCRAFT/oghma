@@ -89,7 +89,13 @@ class TopMenu extends React.Component {
                     </ul>
                     <ul className="nav navbar-nav navbar-right">
                         <li><a href="#" onClick={ this.onClickLogOut }>Log Out</a></li>
-                        <li><Link to="/profile">{ user.name }</Link></li>
+                        <li className="dropdown">
+                            <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{ user.name } <span className="caret"></span></a>
+                            <ul className="dropdown-menu">
+                                <li><Link to="/profile">Profile</Link></li>
+                                <li><Link to="/profile/books">My books</Link></li>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
             )

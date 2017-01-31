@@ -42,33 +42,6 @@ module.exports = (app) => {
                 }
             })
         })
-        .put((req, res) => {
-            const bookId = req.params.id
-            const userId = req.body.id
-
-            User.findById(userId, (err, user) => {
-                if (err) throw err
-                else if (!user) {
-                    res.status(400).json({ message: 'User not found' })
-                } else {
-                    Book.findById(bookId, (err, book) => {
-                        if (err) throw err
-                        else if (!book) {
-                            res.status(404).end()
-                        } else {
-                            book.owners.push(userId)
-                            book.save(err => {
-                                if (err) {
-                                    res.status(400).json(err)
-                                } else {
-                                    res.json(book)
-                                }
-                            })
-                        }
-                    })
-                }
-            })
-        })
 
     app.post('/api/auth/register', (req, res) => {
         const name = req.body.name
@@ -148,12 +121,62 @@ module.exports = (app) => {
             })
         })
 
-    app.get('/api/profile/books', isAuthenticated, (req, res) => {
+    app.route('/api/profile/books')
+        .all(isAuthenticated)
+        .get((req, res) => {
+            const userId = req.user._id
+            Book.find({ owners: userId }, (err, docs) => {
+                if (err) throw err
+                else {
+                    res.json(docs)
+                }
+            })
+        })
+        .post((req, res) => {
+            const bookId = req.body.id
+            const userId = req.user._id
+
+            Book.findById(bookId, (err, book) => {
+                if (err) throw err
+                else if (!book) {
+                    res.status(404).end()
+                } else {
+                    book.owners.push(userId)
+
+                    book.save(err => {
+                        if (err) {
+                            res.status(400).json(err)
+                        } else {
+                            res.json(book)
+                        }
+                    })
+                }
+            })
+
+        })
+
+    app.delete('/api/profile/books/:id', isAuthenticated, (req, res) => {
         const userId = req.user._id
-        Book.find({ owners: userId }, (err, docs) => {
+        const bookId = req.params.id
+
+        Book.findById(bookId, (err, book) => {
             if (err) throw err
-            else {
-                res.json(docs)
+            else if (!book) {
+                res.status(404).end()
+            } else {
+                const indexToDelete = book.owners.indexOf(userId)
+
+                if (indexToDelete !== -1) {
+                    book.owners.splice(indexToDelete, 1)
+                }
+
+                book.save(err => {
+                    if (err) {
+                        res.status(400).json(err)
+                    } else {
+                        res.json(book)
+                    }
+                })
             }
         })
     })

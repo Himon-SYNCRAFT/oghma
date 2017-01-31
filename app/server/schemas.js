@@ -44,7 +44,7 @@ const bookSchema = new Schema({
     name: { type: String, required: true },
     frontCover: String,
     description: String,
-    isbn: { type: String, required: true, unique: true },
+    isbn: { type: String, unique: true },
     owners: [String],
 })
 

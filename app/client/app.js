@@ -10,6 +10,7 @@ const App = require('./components/App.jsx')
 const BooksList = require('./components/BooksList.jsx')
 const BookCreationForm = require('./components/BookCreationForm.jsx')
 const BookDetails = require('./components/BookDetails.jsx')
+const BooksShelf = require('./components/BooksShelf.jsx')
 const LoginForm = require('./components/LoginForm.jsx')
 const RegisterForm = require('./components/RegisterForm.jsx')
 const Profile = require('./components/Profile.jsx')
@@ -23,7 +24,8 @@ ReactDOM.render((
             <Route path="/book/:id" component={ BookDetails } />
             <Route path="/books/add" component={ BookCreationForm } onEnter={ requiredAuth } />
             <Route path="/profile" component={ Profile } onEnter={ requiredAuth } />
-        <Route path="/profile/edit" component={ ProfileEdit } onEnter={ requiredAuth } />
+            <Route path="/profile/edit" component={ ProfileEdit } onEnter={ requiredAuth } />
+            <Route path="/profile/books" component={ BooksShelf } onEnter={ requiredAuth } />
             <Route path="/auth/register" component={ RegisterForm } onEnter={ isUserAlreadyLogged } />
             <Route path="/auth/login" component={ LoginForm } onEnter={ isUserAlreadyLogged } />
         </Route>

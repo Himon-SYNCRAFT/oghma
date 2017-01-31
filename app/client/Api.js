@@ -10,13 +10,25 @@ module.exports = {
             return instance.get('/books')
         },
 
-        one: (id) => {
-            return instance.get('/book/' + id)
+        one: (bookId) => {
+            return instance.get('/book/' + bookId)
         },
 
         create: (data) => {
             return instance.post('/books', data)
         },
+
+        addBookToShelf: (bookId) => {
+            return instance.post('/profile/books/', { id: bookId })
+        },
+
+        removeBookFromShelf: (bookId) => {
+            return instance.delete('/profile/books/' + bookId)
+        },
+
+        getUserBooks: () => {
+            return instance.get('/profile/books')
+        }
     },
 
     userProfile: {

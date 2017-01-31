@@ -2,6 +2,7 @@ const USER_LOG_IN = require('../constants/Constants').USER_LOG_IN
 const USER_LOG_OUT = require('../constants/Constants').USER_LOG_OUT
 const USER_GET_PROFILE = require('../constants/Constants').USER_GET_PROFILE
 const USER_CREATE = require('../constants/Constants').USER_CREATE
+const UNAUTHORIZED = require('../constants/Constants').UNAUTHORIZED
 const EventEmitter = require('events').EventEmitter
 const Dispatcher = require('../Dispatcher')
 
@@ -52,6 +53,7 @@ Dispatcher.register(action => {
             AuthStore.emit(USER_LOG_IN)
             break
 
+        case UNAUTHORIZED:
         case USER_LOG_OUT:
             localStorage.removeItem('userid')
             localStorage.removeItem('username')
