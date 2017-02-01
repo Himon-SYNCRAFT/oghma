@@ -60,14 +60,14 @@ const Book = mongoose.model('Book', bookSchema)
 // Trades
 const tradeSchema = new Schema({
     participantFrom: {
-        user: { type: Schema.Types.ObjectId, required: true },
-        book: { type: Schema.Types.ObjectId },
+        user: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
+        book: { type: Schema.Types.ObjectId, ref: 'Book' },
         accepted: { type: Boolean, default: false },
         done: { type: Boolean, default: false },
     },
     participantTo: {
-        user: { type: Schema.Types.ObjectId, required: true },
-        book: { type: Schema.Types.ObjectId, required: true },
+        user: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
+        book: { type: Schema.Types.ObjectId, required: true, ref: 'Book' },
         accepted: { type: Boolean, default: false },
         done: { type: Boolean, default: false },
     },
