@@ -56,4 +56,35 @@ module.exports = {
             return instance.put('/profile', data)
         }
     }
+
+    trades: {
+        all: () => {
+            return instance.get('/trades')
+        },
+
+        one: (tradeId) => {
+            return instance.get('/trade/' + tradeId)
+        },
+
+        create: (bookId, userId) => {
+            return insance.post('/trades', {
+                bookId,
+                userId
+            })
+        },
+
+        accept: (tradeId) => {
+            return instance.get('/trade/' + tradeId + '/accept')
+        },
+
+        done: (tradeId) => {
+            return instance.get('/trade/' + tradeId + '/done')
+        },
+
+        offerBook: (tradeId, bookId) => {
+            return instance.put('/trade/' + tradeId + '/offerbook', {
+                bookId
+            })
+        }
+    }
 }

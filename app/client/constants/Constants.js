@@ -14,5 +14,12 @@ module.exports = keymirror({
     USER_CREATE: null,
     USER_UPDATE: null,
 
+    TRADES_GET_ALL: null,
+    TRADES_GET_ONE: null,
+    TRADES_CREATE: null,
+    TRADES_ACCEPT: null,
+    TRADES_DONE: null,
+    TRADES_OFFER_BOOK: null,
+
     UNAUTHORIZED: null,
 })
