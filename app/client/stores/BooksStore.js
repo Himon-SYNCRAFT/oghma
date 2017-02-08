@@ -7,7 +7,7 @@ const Dispatcher = require('../Dispatcher')
 const EventEmitter = require('events').EventEmitter
 
 
-const CHANGE = 'CHANGE BOOKS'
+const CHANGE = 'CHANGE'
 let _books = []
 
 const BooksStore = Object.assign({}, EventEmitter.prototype, {

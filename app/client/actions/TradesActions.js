@@ -64,8 +64,8 @@ module.exports = {
             })
     },
 
-    create: (data) => {
-        Api.trades.create(data)
+    create: (bookId, offerReceiverId) => {
+        Api.trades.create(bookId, offerReceiverId)
             .then(res => {
                 Dispatcher.dispatch({
                     actionType: TRADES_CREATE,

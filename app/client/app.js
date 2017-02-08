@@ -15,6 +15,7 @@ const LoginForm = require('./components/LoginForm.jsx')
 const RegisterForm = require('./components/RegisterForm.jsx')
 const Profile = require('./components/Profile.jsx')
 const ProfileEdit = require('./components/ProfileEdit.jsx')
+const TradesList = require('./components/TradesList.jsx')
 
 
 ReactDOM.render((
@@ -26,6 +27,7 @@ ReactDOM.render((
             <Route path="/profile" component={ Profile } onEnter={ requiredAuth } />
             <Route path="/profile/edit" component={ ProfileEdit } onEnter={ requiredAuth } />
             <Route path="/profile/books" component={ BooksShelf } onEnter={ requiredAuth } />
+            <Route path="/profile/trades" component={ TradesList } onEnter={ requiredAuth } />
             <Route path="/auth/register" component={ RegisterForm } onEnter={ isUserAlreadyLogged } />
             <Route path="/auth/login" component={ LoginForm } onEnter={ isUserAlreadyLogged } />
         </Route>

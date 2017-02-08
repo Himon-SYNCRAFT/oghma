@@ -55,7 +55,7 @@ module.exports = {
         updateProfile: (data) => {
             return instance.put('/profile', data)
         }
-    }
+    },
 
     trades: {
         all: () => {
@@ -66,10 +66,10 @@ module.exports = {
             return instance.get('/trade/' + tradeId)
         },
 
-        create: (bookId, userId) => {
+        create: (bookId, offerReceiverId) => {
             return insance.post('/trades', {
                 bookId,
-                userId
+                offerReceiverId
             })
         },
 

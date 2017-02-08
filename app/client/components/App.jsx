@@ -94,6 +94,7 @@ class TopMenu extends React.Component {
                             <ul className="dropdown-menu">
                                 <li><Link to="/profile">Profile</Link></li>
                                 <li><Link to="/profile/books">My books</Link></li>
+                                <li><Link to="/profile/trades">Trades</Link></li>
                             </ul>
                         </li>
                     </ul>
