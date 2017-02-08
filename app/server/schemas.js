@@ -1,101 +1,140 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
+const Sequelize = require('sequelize')
+const { STRING, INTEGER, BOOLEAN, VIRTUAL } = require('sequelize')
 const bcrypt = require('bcrypt')
 const SALT_ROUNDS = 10
 
-const tradeStates = {
-    OFFERED: 'offered',
-    ACCEPTED: 'accepted',
-    COMPLETED: 'completed',
-    CANCELED: 'canceled',
-}
+const Schema = new Sequelize('oghma', 'oghma', 'slonecznaTarcza', {
+    host: '188.68.237.10',
+    dialect: 'postgres',
+    define: {
+        timestamps: false,
+        underscored: false,
+    }
+})
 
 // Users
-const userSchema = new Schema({
-    name: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    first_name: String,
-    last_name: String,
-    city: String,
-    state: String
+const User = Schema.define('users', {
+    id: {
+        type: INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+    },
+
+    name: {
+        type: STRING,
+        allowNull: false,
+        unique: true
+    },
+
+    firstName: {
+        type: STRING,
+    },
+
+    lastName: {
+        type: STRING,
+    },
+
+    city: {
+        type: STRING,
+    },
+
+    state: {
+        type: STRING
+    },
+
+    passwordHash: {
+        type: STRING,
+        allowNull: false,
+    },
 })
 
-userSchema.pre('save', function(next) {
-    let user = this
-
-    if (!user.isModified('password')) return next()
-
-    bcrypt.hash(user.password, SALT_ROUNDS, (err, hash) => {
-        if (err) return next(err)
-
-        user.password = hash
-        next()
-    })
-})
-
-userSchema.set('toJSON', {
-    transform: (doc, ret, options) => {
-        delete ret.password
-        return ret
-    }
-})
-
-userSchema.methods.comparePassword = function(password) {
-    return bcrypt.compare(password, this.password)
-}
-
-const User = mongoose.model('User', userSchema)
+User.generateHash = plainText => bcrypt.hashSync(plainText, SALT_ROUNDS)
+User.comparePassword = (password, passwordHash) => bcrypt.compareSync(password, passwordHash)
 
 // Books
-const bookSchema = new Schema({
-    name: { type: String, required: true },
-    frontCover: String,
-    description: String,
-    isbn: { type: String, unique: true },
-    owners: [String],
+const Book = Schema.define('books', {
+    id: {
+        type: INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+    },
+
+    name: {
+        type: STRING,
+        allowNull: false,
+    },
+
+    frontCoverImg: {
+        type: STRING,
+    },
+
+    description: {
+        type: STRING,
+    },
+
+    isbn: {
+        type: STRING,
+        unique: true
+    },
 })
 
-const Book = mongoose.model('Book', bookSchema)
+// Copies of the Books
+const CopyOfBook = Schema.define('copies_of_books', {
+    id: {
+        type: INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+    },
+
+    userId: {
+        type: INTEGER,
+        allowNull: false,
+    },
+
+    bookId: {
+        type: INTEGER,
+        allowNull: false,
+    },
+})
+
+CopyOfBook.belongsTo(User, { foreignKey: 'userId' })
+CopyOfBook.belongsTo(Book, { foreignKey: 'bookId' })
+
+User.belongsToMany(Book, { through: 'copies_of_books', as: 'books' })
+Book.belongsToMany(User, { through: 'copies_of_books', as: 'owners' })
+
 
 // Trades
-const tradeSchema = new Schema({
-    participantFrom: {
-        user: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
-        book: { type: Schema.Types.ObjectId, ref: 'Book' },
-        accepted: { type: Boolean, default: false },
-        done: { type: Boolean, default: false },
+const Trade = Schema.define('trades', {
+    id: {
+        type: INTEGER,
+        autoIncrement: true,
+        primaryKey: true
     },
-    participantTo: {
-        user: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
-        book: { type: Schema.Types.ObjectId, required: true, ref: 'Book' },
-        accepted: { type: Boolean, default: false },
-        done: { type: Boolean, default: false },
+
+    idCopyOfBookOfferer: {
+        type: INTEGER,
     },
-    canceled: { type: Boolean, default: false }
+
+    idCopyOfBookReceiver: {
+        type: INTEGER,
+    },
+
+    isCanceled: {
+        type: BOOLEAN,
+        defaultValue: false,
+    },
+}, {
+    timestamps: true
 })
 
-tradeSchema.virtual('status').get(() => {
-    let status = tradeStates.OFFERED
-
-    if (this.participantFrom.accepted && this.participantTo.accepted) {
-        status = tradeStates.ACCEPTED
-    } else if (this.participantFrom.done && this.participantTo.done) {
-        status = tradeStates.COMPLETED
-    } else if (this.canceled) {
-        status = tradeStates.CANCELED
-    }
-
-    return status
-})
-
-tradeSchema.set('toJSON', {
-    virtuals: true,
-})
-
-const Trade = mongoose.model('Trade', tradeSchema)
+Trade.belongsTo(CopyOfBook, { foreignKey: 'idCopyOfBookOfferer', as: 'offererBook' })
+Trade.belongsTo(CopyOfBook, { foreignKey: 'idCopyOfBookReceiver', as: 'receiverBook' })
 
 module.exports = {
-    User,
     Book,
-    Trade
+    User,
+    Trade,
+    CopyOfBook,
+    Schema
 }

@@ -1,27 +1,43 @@
-const Trade = require('../schemas').Trade
+const { Trade, User, Book, CopyOfBook } = require('../schemas')
+const Sequelize = require('sequelize')
+
 
 module.exports = {
     getAllTrades: (req, res) => {
-        const userId = req.user._id
+        const userId = req.user.id
+
+        const where = '"trades"."isCanceled" = false AND '
+            + '("offererBook"."userId" = ' + userId
+            + ' OR "receiverBook"."userId" = ' + userId + ')'
 
         Trade
-            .find({
-                $or: [{ 'participantFrom.user': userId }, { 'participantTo.user': userId }],
-                canceled: false
+            .findAll({
+                where: [where],
+
+                include: [
+                    {
+                        model: CopyOfBook,
+                        as: 'offererBook',
+                    },
+
+                    {
+                        model: CopyOfBook,
+                        as: 'receiverBook',
+                    },
+                ]
             })
-            .populate('participantFrom.user')
-            .populate('participantFrom.book')
-            .populate('participantTo.user')
-            .populate('participantTo.book')
-            .exec((err, trades) => {
-                if (err) throw err
+            .then(trades => {
                 res.json(trades)
+            })
+            .catch(err => {
+                res.status(500).end()
+                throw err
             })
     },
 
     createTrade: (req, res) => {
-        const participantFromUserId = req.user._id
-        const participantToUserId = req.body.userId
+        const participantFromUserId = req.user.id
+        const participantToUserId = req.body.offerReceiverId
         const bookId = req.body.bookId
 
         const trade = new Trade({
@@ -52,7 +68,7 @@ module.exports = {
     },
 
     getTrade: (req, res) => {
-        const userId = req.user._id
+        const userId = req.user.id
         const tradeId = req.params.id
 
         Trade
@@ -77,7 +93,7 @@ module.exports = {
     },
 
     acceptTrade: (req, res) => {
-        const userId = req.user._id
+        const userId = req.user.id
         const tradeId = req.params.id
 
         Trade.findOne({
@@ -130,7 +146,7 @@ module.exports = {
     },
 
     doneTrade: (req, res) => {
-        const userId = req.user._id
+        const userId = req.user.id
         const tradeId = req.params.id
 
         Trade.findOne({
@@ -172,7 +188,7 @@ module.exports = {
     },
 
     addBookToTrade: (req, res) => {
-        const userId = req.user._id
+        const userId = req.user.id
         const tradeId = req.params.id
         const bookId = req.body.bookId
 

@@ -2,30 +2,29 @@ const User = require('../schemas').User
 
 module.exports = {
     register: (req, res) => {
+        const city = req.body.city
+        const firstName = req.body.firstName
+        const lastName = req.body.lastName
         const name = req.body.name
         const password = req.body.password
-        const city = req.body.city
         const state = req.body.state
-        const first_name = req.body.first_name
-        const last_name = req.body.last_name
 
-        const user = new User({
-            name,
-            password,
+        let user = User.build({
             city,
+            firstName,
+            lastName,
+            name,
             state,
-            first_name,
-            last_name
+            passwordHash: User.generateHash(passwod)
         })
 
-        user.save(err => {
-            if (err) {
-                res.status(400).json(err)
-                return
-            }
-
-            res.json(user)
-        })
+        user.save()
+            .then(user => {
+                res.json(user)
+            })
+            .catch(err => {
+                res.json(err)
+            })
     },
 
     login: (req, res) => {

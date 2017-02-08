@@ -1,5 +1,4 @@
 const express = require('express')
-const mongoose = require('mongoose')
 const compression = require('compression')
 const session = require('express-session')
 const bodyParser = require('body-parser')
@@ -11,16 +10,6 @@ const routes = require('./app/server/routes')
 const app = express()
 const port = process.env.PORT || 3000
 
-// Mongoose configuration
-const connectionString = 'mongodb://tutorial:tutorial@ds151137.mlab.com:51137/clementine'
-const options = {
-    server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } },
-    replset: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } }
-}
-mongoose.connect(connectionString, options)
-mongoose.Promise = global.Promise
-const db = mongoose.connection
-db.on('error', console.error.bind(console, 'Connection Error:'))
 
 // Passport configuration
 passport.use(new LocalStrategy(
@@ -30,34 +19,42 @@ passport.use(new LocalStrategy(
     },
 
     (username, password, done) => {
-        User.findOne({ name: username }, (err, user) => {
-            if (err) { return done(err) }
+        console.log('LocalStrategy');
+        console.log(username, password);
+        User.find({ name: username })
+            .then(user => {
+                if (!user) {
+                    return done(null, false, { message: 'Incorrect username' })
+                }
 
-            if (!user) {
-                return done(null, false, { message: 'Incorrect name' })
-            }
+                const isValidPassword = User.comparePassword(password, user.passwordHash)
 
-            user.comparePassword(password)
-                .then(res => {
-                    if (!res) {
-                        return done(null, false, { message: 'Incorrect password' })
-                    } else {
-                        return done(null, user)
-                    }
-                })
-
-        })
+                if (isValidPassword) {
+                    return done(null, user)
+                } else {
+                    return done(null, false, { message: 'Incorrect password' })
+                }
+            })
+            .catch(err => {
+                if (err) { return done(err) }
+            })
     }
 ))
 
 passport.serializeUser((user, done) => {
+    // console.log('serializeUser', user.id);
     done(null, user.id)
 })
 
 passport.deserializeUser((id, done) => {
-    User.findById(id, (err, user) => {
-        done(err, user)
-    })
+    // console.log('deserializeUser', id);
+    User.findById(id)
+        .then(user => {
+            done(null, user)
+        })
+        .catch(err => {
+            done(err)
+        })
 })
 
 // App configuration
@@ -77,8 +74,6 @@ app.use(passport.session())
 
 routes(app)
 
-db.once('open', () => {
-    app.listen(port, () => {
-        console.log('App start at port ' + port)
-    })
+app.listen(port, () => {
+    console.log('App start at port ' + port)
 })

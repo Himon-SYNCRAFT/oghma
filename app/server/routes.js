@@ -3,9 +3,64 @@ const BooksController = require('./controllers/BooksController')
 const TradesController = require('./controllers/TradesController')
 const AuthController = require('./controllers/AuthController')
 const ProfileController = require('./controllers/ProfileController')
+const { User, Book, Trade, CopyOfBook, Schema } = require('./schemas.js')
 
 
 module.exports = (app) => {
+    app.get('/createdb', (req, res) => {
+        Schema.sync({ force: true })
+            .then(() => {
+                let user = User.build({
+                    name: 'danzaw',
+                    firstName: 'Daniel',
+                    lastName: 'Zawlocki',
+                    city: 'Czestochowa',
+                    state: 'Silesia',
+                    passwordHash: User.generateHash('danzaw')
+                })
+
+                let user2 = User.build({
+                    name: 'himon',
+                    firstName: 'Daniel',
+                    lastName: 'Zawlocki',
+                    city: 'Czestochowa',
+                    state: 'Silesia',
+                    passwordHash: User.generateHash('himon')
+                })
+
+                let book = Book.build({
+                    name: 'Python',
+                })
+
+                let book2 = Book.build({
+                    name: 'Python2',
+                })
+
+                Promise.all([user.save(), book.save(), user2.save(), book2.save()])
+                    .then(([user, book]) => {
+                        let copy = CopyOfBook.build({
+                            userId: user.id,
+                            bookId: book.id
+                        })
+
+                        let copy2 = CopyOfBook.build({
+                            userId: user2.id,
+                            bookId: book2.id
+                        })
+
+                        Promise.all([copy.save(), copy2.save()])
+                            .then(([copy, copy2]) => {
+                                Trade.create({
+                                    idCopyOfBookOfferer: copy.id,
+                                    idCopyOfBookReceiver: copy2.id,
+                                })
+                            })
+                    })
+
+                res.end()
+            })
+    })
+
     app.route('/api/books')
         .all(isAuthenticated)
         .get(BooksController.getAllBooks)
@@ -51,6 +106,7 @@ module.exports = (app) => {
 }
 
 const isAuthenticated = (req, res, next) => {
+    // return next()
     if (req.isAuthenticated()) return next()
     res.status(401).end()
 }
