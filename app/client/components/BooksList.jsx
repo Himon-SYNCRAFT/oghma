@@ -34,7 +34,7 @@ class BooksList extends React.Component {
 
     render() {
         let books = this.state.books.map(item => {
-            return (<BooksListItem book={ item } key={ item._id } />)
+            return (<BooksListItem book={ item } key={ item.id } />)
         })
 
         return (
@@ -55,7 +55,7 @@ class BooksListItem extends React.Component {
 
     render() {
         const captionMaxLength = 17
-        const id = this.props.book._id
+        const id = this.props.book.id
         const name = this.props.book.name
         const caption = name.length > captionMaxLength ? name.substr(0, captionMaxLength - 4) + ' ...' : name
         const img = this.props.book.frontCover ? this.props.book.frontCover : 'http://localhost:3000/public/img/book-cover-example.png'

@@ -52,7 +52,6 @@ module.exports = (app) => {
                             .then(([copy, copy2]) => {
                                 Trade.create({
                                     idCopyOfBookOfferer: copy.id,
-                                    idCopyOfBookReceiver: copy2.id,
                                 })
                             })
                     })

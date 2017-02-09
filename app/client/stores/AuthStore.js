@@ -33,7 +33,7 @@ const AuthStore = Object.assign({}, EventEmitter.prototype, {
 
         return {
             name: username,
-            _id: userid
+            id: userid
         }
     },
 
@@ -48,7 +48,7 @@ Dispatcher.register(action => {
 
     switch(action.actionType) {
         case USER_LOG_IN:
-            localStorage.setItem('userid', action.data._id)
+            localStorage.setItem('userid', action.data.id)
             localStorage.setItem('username', action.data.name)
             AuthStore.emit(USER_LOG_IN)
             break

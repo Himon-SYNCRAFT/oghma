@@ -13,7 +13,7 @@ const BooksShelfStore = Object.assign({}, EventEmitter.prototype, {
     },
 
     one: (id) => {
-        return _books.find(book => book._id == id)
+        return _books.find(book => book.id == id)
     },
 
     addChangeListener: function(callback) {
@@ -34,7 +34,7 @@ Dispatcher.register(action => {
 
         case BOOKS_ADD_TO_USER_SHELF:
             const book = action.data
-            const bookIndex = _books.findIndex(element => element._id == book._id)
+            const bookIndex = _books.findIndex(element => element.id == book.id)
 
             if (bookIndex === -1) {
                 _books.push(book)

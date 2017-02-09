@@ -20,7 +20,7 @@ class TradesList  extends React.Component {
         TradesActions.all()
 
         const user = AuthStore.get()
-        this.setState({ userId: user._id })
+        this.setState({ userId: user.id })
     }
 
     componentWillUnmount() {
@@ -33,7 +33,7 @@ class TradesList  extends React.Component {
     }
 
     render() {
-        const listItems = this.state.trades.map(trade => <TradeListItem trade={trade} userId={this.state.userId} />)
+        const listItems = this.state.trades.map(trade => <TradesListItem key={trade.id} trade={trade} userId={this.state.userId} />)
 
         return (
             <ul className="list-group">
@@ -52,9 +52,15 @@ class TradesListItem extends React.Component {
     render() {
         const trade = this.props.trade
         const userId = this.props.userId
-        const isUserOffer = userId == trade.participantFrom.user
+        const isUserOffer = userId == trade.offerer.userId
 
-        const text = isUserOffer ? trade.participantTo.book.name : trade.participantFrom.book.name
+        const offererBookTitle = trade.offerer.book ? trade.offerer.book.title : ''
+        const receiverBookTitle = trade.receiver.book ? trade.receiver.book.title : ''
+
+        const userBookTitle = isUserOffer ? offererBookTitle : receiverBookTitle
+        const otherBookTitle = !isUserOffer ? offererBookTitle : receiverBookTitle
+
+        const text = userBookTitle + ' for ' + otherBookTitle
 
         return (
             <li className="list-group-item">{ text }</li>

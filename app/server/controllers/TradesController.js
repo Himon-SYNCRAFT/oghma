@@ -6,12 +6,42 @@ module.exports = {
     getAllTrades: (req, res) => {
         const userId = req.user.id
 
-        const where = '"trades"."isCanceled" = false AND '
+        Trade.scope({ method: ['userTrades', userId] })
+            .findAll()
+            .then(trades => {
+                res.json(trades)
+            })
+            .catch(err => {
+                res.status(500).end()
+                throw err
+            })
+    },
+
+    createTrade: (req, res) => {
+        const idCopyOfBookReceiver = req.body.idCopyOfBookReceiver
+
+        Trade
+            .create({
+                idCopyOfBookReceiver
+            })
+            .then(trade => {
+                res.json(trade)
+            })
+            .catch(err => {
+                res.status(400).json(err)
+            })
+    },
+
+    getTrade: (req, res) => {
+        const userId = req.user.id
+        const tradeId = req.params.id
+
+        const where = '"trades"."id" = '+ tradeId +' AND '
             + '("offererBook"."userId" = ' + userId
             + ' OR "receiverBook"."userId" = ' + userId + ')'
 
         Trade
-            .findAll({
+            .findOne({
                 where: [where],
 
                 include: [
@@ -26,8 +56,12 @@ module.exports = {
                     },
                 ]
             })
-            .then(trades => {
-                res.json(trades)
+            .then(trade => {
+                if(trade) {
+                    res.json(trade)
+                } else {
+                    res.status(404).end()
+                }
             })
             .catch(err => {
                 res.status(500).end()
@@ -35,156 +69,63 @@ module.exports = {
             })
     },
 
-    createTrade: (req, res) => {
-        const participantFromUserId = req.user.id
-        const participantToUserId = req.body.offerReceiverId
-        const bookId = req.body.bookId
-
-        const trade = new Trade({
-            participantFrom: {
-                user: participantFromUserId
-            },
-            participantTo: {
-                user: participantToUserId,
-                book: bookId
-            }
-        })
-
-        trade.save(err => {
-            if (err) {
-                res.status(400).json(err)
-            } else {
-                trade
-                    .populate('participantFrom.user')
-                    .populate('participantFrom.book')
-                    .populate('participantTo.user')
-                    .populate('participantTo.book')
-                    .exec((err, trade) => {
-                        if (err) throw err
-                        res.json(trade)
-                    })
-            }
-        })
-    },
-
-    getTrade: (req, res) => {
-        const userId = req.user.id
-        const tradeId = req.params.id
-
-        Trade
-            .findOne({
-                _id: tradeId,
-                $or: [{ 'participantFrom.user': userId }, { 'participantTo.user': userId }],
-                canceled: false
-            })
-            .populate('participantFrom.user')
-            .populate('participantFrom.book')
-            .populate('participantTo.user')
-            .populate('participantTo.book')
-            .exec((err, trade) => {
-                if (err) throw err
-                else if (!trade) {
-                    res.status(404).end()
-                }
-                else {
-                    res.json(trade)
-                }
-            })
-    },
-
     acceptTrade: (req, res) => {
         const userId = req.user.id
         const tradeId = req.params.id
 
-        Trade.findOne({
-            _id: tradeId,
-            $or: [{ 'participantFrom.user': userId }, { 'participantTo.user': userId }],
-            $and: [{ 'participantFrom.done': false }, { 'participantTo.done': false }],
-            canceled: false
-        }, (err, trade) => {
-            if (err) throw err
-            else if (!trade) {
-                res.status(404).end()
-            }
-            else {
-                if (trade.participantFrom.user == userId) {
-                    if (!trade.participantTo.accepted) {
-                        err = "You can't accept trade before other participant"
-                        res.status(400).json({ errors: [err] })
-                        return
-                    } else {
-                        trade.participantFrom.accepted = true
-                    }
+        Trade.scope({ method: ['userTradeById', tradeId, userId] })
+            .findOne()
+            .then(trade => {
+                if (!trade) {
+                    res.status(404).end()
                 } else {
-                    if (!trade.participantFrom.book) {
-                        err = "You can't accept trade before choosing book to trade"
-                        res.status(400).json({ errors: [err] })
-                        return
+                    if (trade.offererBook.userId == userId) {
+                        trade.offererAccept = true
                     }
-                    trade.participantTo.accepted = true
-                }
+                    if (trade.receiverBook.userId == userId) {
+                        trade.receiverAccept = true
+                    }
 
-                trade.save(err => {
-                    if (err) {
-                        res.status(400).json(err)
-                    } else {
-                        trade
-                            .populate('participantFrom.user')
-                            .populate('participantFrom.book')
-                            .populate('participantTo.user')
-                            .populate('participantTo.book')
-                            .exec((err, trade) => {
-                                if (err) throw err
-                                else {
-                                    res.json(trade)
-                                }
-                            })
-                    }
-                })
-            }
-        })
+                    trade.save()
+                        .then(trade => {
+                            res.json(trade)
+                        })
+                        .catch(err => {
+                            res.status(400).json(err)
+                        })
+                }
+            })
+            .catch(err => {
+                res.status(400).json(err)
+            })
     },
 
     doneTrade: (req, res) => {
         const userId = req.user.id
         const tradeId = req.params.id
 
-        Trade.findOne({
-            _id: tradeId,
-            $or: [{ 'participantFrom.user': userId }, { 'participantTo.user': userId }],
-            $and: [{ 'participantFrom.accepted': true }, { 'participantTo.accepted': true }],
-            canceled: false
-        }, (err, trade) => {
-            if (err) throw err
-            else if (!trade) {
-                res.status(404).end()
-            }
-            else {
-                if (trade.participantFrom.user == userId) {
-                    trade.participantFrom.done = true
+        Trade.scope({ method: ['userTradeById', tradeId, userId] })
+            .findOne()
+            .then(trade => {
+                if (!trade) {
+                    res.status(404).end()
                 } else {
-                    trade.participantTo.done = true
-                }
-
-                trade.save(err => {
-                    if (err) {
-                        res.status(400).json(err)
-                    } else {
-                        trade
-                            .populate('participantFrom.user')
-                            .populate('participantFrom.book')
-                            .populate('participantTo.user')
-                            .populate('participantTo.book')
-                            .exec((err, trade) => {
-                                if (err) throw err
-                                else {
-                                    res.json(trade)
-                                }
-                            })
+                    if (trade.offererBook.userId == userId) {
+                        trade.offererDone = true
                     }
-                })
-            }
-        })
+                    if (trade.receiverBook.userId == userId) {
+                        trade.receiverDone = true
+                    }
+
+                    trade.save()
+                        .then(trade => {
+                            res.json(trade)
+                        })
+                        .catch(err => {
+                            res.status(400).json(err)
+                        })
+                }
+            })
     },
 
     addBookToTrade: (req, res) => {
@@ -192,43 +133,27 @@ module.exports = {
         const tradeId = req.params.id
         const bookId = req.body.bookId
 
-        Book.findOne({ _id: bookId, owners: userId }, (err, book) => {
-            if (err) throw err
-            else if (!book) {
-                const err = 'Invalid book id'
-                res.status(400).json({ errors: [err] })
-                return
-            }
-        })
-
-        Trade.findOne({
-            _id: tradeId,
-            'participantTo.user': userId,
-            'participantFrom.accepted': false
-        }, (err, trade) => {
-            if (err) throw err
-            else if (trade) {
-                res.status(404).end()
-            } else {
-                trade.participantFrom.book = bookId
-                trade.save(err => {
-                    if (err) {
-                        res.status(400).json(err)
-                    } else {
-                        trade
-                            .populate('participantFrom.user')
-                            .populate('participantFrom.book')
-                            .populate('participantTo.user')
-                            .populate('participantTo.book')
-                            .exec((err, trade) => {
-                                if (err) throw err
-                                else {
-                                    res.json(trade)
-                                }
-                            })
+        Trade.scope({ method: ['userTradeById', tradeId, userId] })
+            .findOne()
+            .then(trade => {
+                if (!trade) {
+                    res.status(404).end()
+                } else {
+                    if (trade.offererBook.userId == userId) {
+                        trade.idCopyOfBookReceiver = bookId
                     }
-                })
-            }
-        })
+                    if (trade.receiverBook.userId == userId) {
+                        trade.idCopyOfBookOfferer = bookId
+                    }
+
+                    trade.save()
+                        .then(trade => {
+                            res.json(trade)
+                        })
+                        .catch(err => {
+                            res.status(400).json(err)
+                        })
+                }
+            })
     },
 }

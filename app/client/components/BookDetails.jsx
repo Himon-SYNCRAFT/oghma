@@ -22,7 +22,7 @@ class BookDetails extends React.Component {
         BooksActions.one(this.props.params.id)
 
         const user = AuthStore.get()
-        this.setState({ userId: user._id })
+        this.setState({ userId: user.id })
     }
 
     componentWillUnmount() {
@@ -36,12 +36,12 @@ class BookDetails extends React.Component {
     }
 
     onClickAddBookToShelf() {
-        const bookId = this.state.book._id
+        const bookId = this.state.book.id
         BooksActions.addBookToShelf(bookId)
     }
 
     onClickRemoveBookFromShelf() {
-        const bookId = this.state.book._id
+        const bookId = this.state.book.id
         BooksActions.removeBookFromShelf(bookId)
     }
 
