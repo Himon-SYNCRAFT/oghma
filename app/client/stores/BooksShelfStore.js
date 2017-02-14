@@ -1,4 +1,5 @@
 const BOOKS_ADD_TO_USER_SHELF = require('../constants/Constants').BOOKS_ADD_TO_USER_SHELF
+const BOOKS_REMOVE_FROM_USER_SHELF = require('../constants/Constants').BOOKS_REMOVE_FROM_USER_SHELF
 const BOOKS_GET_USER_BOOKS = require('../constants/Constants').BOOKS_GET_USER_BOOKS
 const Dispatcher = require('../Dispatcher')
 const EventEmitter = require('events').EventEmitter
@@ -26,15 +27,17 @@ const BooksShelfStore = Object.assign({}, EventEmitter.prototype, {
 })
 
 Dispatcher.register(action => {
+    let book
+    let bookIndex
     switch (action.actionType) {
         case BOOKS_GET_USER_BOOKS:
-            _books = action.data
+            _books = action.data.map(copy => transformCopyToBook(copy))
             BooksShelfStore.emit(CHANGE)
             break;
 
         case BOOKS_ADD_TO_USER_SHELF:
-            const book = action.data
-            const bookIndex = _books.findIndex(element => element.id == book.id)
+            book = action.data
+            bookIndex = _books.findIndex(element => element.id == book.id)
 
             if (bookIndex === -1) {
                 _books.push(book)
@@ -44,9 +47,19 @@ Dispatcher.register(action => {
 
             BooksShelfStore.emit(CHANGE)
             break;
+
+        case BOOKS_REMOVE_FROM_USER_SHELF:
+            book = action.data
+            bookIndex = _books.findIndex(element => element.id == book.id)
+
+            if (bookIndex !== -1) {
+                _books.splice(bookIndex, 1)
+            }
+
+            BooksShelfStore.emit(CHANGE)
+            break;
     }
 })
-
 
 module.exports = BooksShelfStore
 

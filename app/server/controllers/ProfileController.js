@@ -83,13 +83,18 @@ module.exports = {
                     { model: Book, as: 'book' }
                 ]
             })
-            .then((book, created) => {
-                let status = 200
-                if (created) {
-                    status = 201
-                }
-
-                res.status(status).json(book)
+            .then((copy, created) => {
+                Book.scope('withOwners').findById(bookId)
+                    .then(book => {
+                        let status = 200
+                        if (created) {
+                            status = 201
+                        }
+                        res.status(status).json(book)
+                    })
+                    .catch(err => {
+                        res.status(400).json(err)
+                    })
             })
             .catch(err => {
                 res.status(400).json(err)
@@ -104,8 +109,14 @@ module.exports = {
             .destroy({
                 where: { userId, bookId }
             })
-            .then(book => {
-                res.json(book)
+            .then(() => {
+                Book.scope('withOwners').findById(bookId)
+                    .then(book => {
+                        res.json(book)
+                    })
+                    .catch(err => {
+                        res.status(400).json(err)
+                    })
             })
             .catch(err => {
                 res.status(400).json(err)

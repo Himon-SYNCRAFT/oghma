@@ -69,17 +69,27 @@ const Book = Schema.define('books', {
     },
 
     description: {
-        type: STRING,
+        type: STRING(5096),
     },
 
     isbn: {
         type: STRING,
         unique: true
     },
+}, {
+    scopes: {
+        withOwners: function() {
+            return {
+                include: [
+                    { model: User, as: 'owners' }
+                ]
+            }
+        }
+    }
 })
 
 // Copies of the Books
-const CopyOfBook = Schema.define('copies_of_books', {
+const CopyOfBook = Schema.define('copiesOfBooks', {
     id: {
         type: INTEGER,
         autoIncrement: true,
@@ -100,8 +110,8 @@ const CopyOfBook = Schema.define('copies_of_books', {
 CopyOfBook.belongsTo(User, { foreignKey: 'userId' })
 CopyOfBook.belongsTo(Book, { foreignKey: 'bookId' })
 
-User.belongsToMany(Book, { through: 'copies_of_books', as: 'books' })
-Book.belongsToMany(User, { through: 'copies_of_books', as: 'owners' })
+User.belongsToMany(Book, { through: 'copiesOfBooks', as: 'books' })
+Book.belongsToMany(User, { through: 'copiesOfBooks', as: 'owners' })
 
 
 // Trades
@@ -205,6 +215,19 @@ const Trade = Schema.define('trades', {
         }
     },
     validate: {
+        uniqueUser: function() {
+            if(!this.offererBook || !this.receiverBook) {
+                return
+            }
+
+            const offererId = this.offererBook.userId
+            const receiverId = this.receiverBook.userId
+
+            if (offererId == receiverId) {
+                throw new Error("You cant' trade with yourself")
+            }
+        },
+
         canAccept: function() {
             if (this.offererAccept === true && this.idCopyOfBookReceiver === null) {
                 throw new Error("You can't accept trade before choosing a book to trade")
