@@ -2,6 +2,7 @@ const express = require('express')
 const compression = require('compression')
 const session = require('express-session')
 const bodyParser = require('body-parser')
+const cors = require('cors')
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const User = require('./app/server/schemas').User
@@ -19,8 +20,6 @@ passport.use(new LocalStrategy(
     },
 
     (username, password, done) => {
-        console.log('LocalStrategy');
-        console.log(username, password);
         User.find({ name: username })
             .then(user => {
                 if (!user) {
@@ -58,6 +57,7 @@ passport.deserializeUser((id, done) => {
 })
 
 // App configuration
+app.use(cors())
 app.use(compression())
 app.use(session({
     secret: '$2a$12$2Z.wdo.8ytoNn6b5faNAt.ywUFo5g2BmbS2FBJAUbg2iUWJc7li9q',
