@@ -1,4 +1,4 @@
-const Book = require('../schemas.js').Book
+const { Book, CopyOfBook, User } = require('../schemas')
 
 
 module.exports = {
@@ -30,7 +30,12 @@ module.exports = {
     },
 
     getBook: (req, res) => {
-        Book.findById(req.params.id)
+        Book
+            .findById(req.params.id, {
+                include: [
+                    { model: User, as: 'owners' }
+                ]
+            })
             .then(book => {
                 if (!book) {
                     res.status(404).end()
