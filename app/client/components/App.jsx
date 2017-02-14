@@ -4,6 +4,7 @@ const AuthStore = require('../stores/AuthStore')
 const ErrorStore = require('../stores/ErrorStore')
 const AuthActions = require('../actions/AuthActions')
 const browserHistory = require('react-router').browserHistory
+const Dropdown = require('./generic/Dropdown')
 
 
 class App extends React.Component {
@@ -80,6 +81,11 @@ class TopMenu extends React.Component {
     render() {
         const isLogged = this.props.isLogged
         const user = this.props.user
+        const dropdownLinks = [
+            <Link to="/profile">Profile</Link>,
+            <Link to="/profile/trades">Trades</Link>,
+            <Link to="/profile/books">My books</Link>,
+        ]
         const navbar = isLogged
             ? (
                 <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -89,14 +95,7 @@ class TopMenu extends React.Component {
                     </ul>
                     <ul className="nav navbar-nav navbar-right">
                         <li><a href="#" onClick={ this.onClickLogOut }>Log Out</a></li>
-                        <li className="dropdown">
-                            <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{ user.name } <span className="caret"></span></a>
-                            <ul className="dropdown-menu">
-                                <li><Link to="/profile">Profile</Link></li>
-                                <li><Link to="/profile/books">My books</Link></li>
-                                <li><Link to="/profile/trades">Trades</Link></li>
-                            </ul>
-                        </li>
+                        <Dropdown items={dropdownLinks} title={ user.name } />
                     </ul>
                 </div>
             )
