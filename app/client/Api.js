@@ -67,7 +67,7 @@ module.exports = {
         },
 
         create: (bookId, offerReceiverId) => {
-            return insance.post('/trades', {
+            return instance.post('/trades', {
                 bookId,
                 offerReceiverId
             })
