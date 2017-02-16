@@ -122,6 +122,16 @@ const Trade = Schema.define('trades', {
         primaryKey: true
     },
 
+    idOfferer: {
+        type: INTEGER,
+        required: true,
+    },
+
+    idReceiver: {
+        type: INTEGER,
+        required: true,
+    },
+
     idCopyOfBookOfferer: {
         type: INTEGER,
     },
@@ -159,34 +169,61 @@ const Trade = Schema.define('trades', {
     timestamps: true,
     scopes: {
         userTradeById: function(tradeId, userId) {
-            const where = '"trades"."id" = '+ tradeId +' AND '
-                + '("offererBook"."userId" = ' + userId
-                + ' OR "receiverBook"."userId" = ' + userId + ')'
-
             return {
-                where: [where],
+                where: {
+                    isCanceled: false,
+                    $or: [
+                        { idReceiver: userId },
+                        { idOfferer: userId },
+                    ],
+                    id: tradeId
+                },
 
                 include: [
                     {
                         model: CopyOfBook,
                         as: 'offererBook',
+                        include: [
+                            {
+                                model: Book,
+                                as: 'book',
+                            }
+                        ]
                     },
 
                     {
                         model: CopyOfBook,
                         as: 'receiverBook',
+                        include: [
+                            {
+                                model: Book,
+                                as: 'book',
+                            }
+                        ]
+                    },
+
+                    {
+                        model: User,
+                        as: 'receiver',
+                    },
+
+                    {
+                        model: User,
+                        as: 'offerer',
                     },
                 ]
             }
         },
 
         userTrades: function(userId) {
-            const where = '"trades"."isCanceled" = false AND '
-                + '("offererBook"."userId" = ' + userId
-                + ' OR "receiverBook"."userId" = ' + userId + ')'
-
             return {
-                where: [where],
+                where: {
+                    isCanceled: false,
+                    $or: [
+                        { idReceiver: userId },
+                        { idOfferer: userId },
+                    ]
+                },
 
                 include: [
                     {
@@ -209,6 +246,16 @@ const Trade = Schema.define('trades', {
                                 as: 'book',
                             }
                         ]
+                    },
+
+                    {
+                        model: User,
+                        as: 'receiver',
+                    },
+
+                    {
+                        model: User,
+                        as: 'offerer',
                     },
                 ]
             }
@@ -256,6 +303,8 @@ const Trade = Schema.define('trades', {
 
 Trade.belongsTo(CopyOfBook, { foreignKey: 'idCopyOfBookOfferer', as: 'offererBook' })
 Trade.belongsTo(CopyOfBook, { foreignKey: 'idCopyOfBookReceiver', as: 'receiverBook' })
+Trade.belongsTo(User, { foreignKey: 'idOfferer', as: 'offerer' })
+Trade.belongsTo(User, { foreignKey: 'idReceiver', as: 'receiver' })
 
 module.exports = {
     Book,

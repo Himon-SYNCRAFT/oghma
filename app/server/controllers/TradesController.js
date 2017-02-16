@@ -18,14 +18,34 @@ module.exports = {
     },
 
     createTrade: (req, res) => {
-        const idCopyOfBookReceiver = req.body.idCopyOfBookReceiver
+        const userId = req.user.id
+        const bookId = req.body.bookId
+        const receiverId = req.body.offerReceiverId
 
-        Trade
-            .create({
-                idCopyOfBookReceiver
+        CopyOfBook
+            .findOne({
+                where: {
+                    userId: receiverId,
+                    bookId
+                }
             })
-            .then(trade => {
-                res.json(trade)
+            .then(copy => {
+                if (!copy) {
+                    return res.status(400).json({ errors: ["Book not found"] })
+                }
+
+                Trade
+                    .create({
+                        idOfferer: userId,
+                        idReceiver: receiverId,
+                        idCopyOfBookReceiver: copy.id
+                    })
+                    .then(trade => {
+                        res.json(trade)
+                    })
+                    .catch(err => {
+                        res.status(400).json(err)
+                    })
             })
             .catch(err => {
                 res.status(400).json(err)
@@ -36,26 +56,8 @@ module.exports = {
         const userId = req.user.id
         const tradeId = req.params.id
 
-        const where = '"trades"."id" = '+ tradeId +' AND '
-            + '("offererBook"."userId" = ' + userId
-            + ' OR "receiverBook"."userId" = ' + userId + ')'
-
-        Trade
-            .findOne({
-                where: [where],
-
-                include: [
-                    {
-                        model: CopyOfBook,
-                        as: 'offererBook',
-                    },
-
-                    {
-                        model: CopyOfBook,
-                        as: 'receiverBook',
-                    },
-                ]
-            })
+        Trade.scope({ method: ['userTradeById', tradeId, userId] })
+            .findOne()
             .then(trade => {
                 if(trade) {
                     res.json(trade)

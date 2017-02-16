@@ -56,13 +56,16 @@ module.exports = (app) => {
 
                         Promise.all([copy.save(), copy2.save()])
                             .then(([copy, copy2]) => {
-                                Trade.create({
-                                    idCopyOfBookOfferer: copy.id,
-                                })
+                                // Trade.create({
+                                //     idCopyOfBookOfferer: copy.id,
+                                //     idOfferer: copy.userId,
+                                //     idReceiver: copy2.userId,
+                                // })
+
+                                res.end()
                             })
                     })
 
-                res.end()
             })
     })
 

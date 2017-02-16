@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "browserify -t [ babelify --presets [ es2015 react ] ] app/client/app.js > public/js/bundle.js && uglifyjs --no-bundle-external public/js/bundle.js -o public/js/bundle.min.js",
+    "build": "browserify -t [ babelify --presets [ es2015 react ] ] app/client/app.js > public/js/bundle.js",
+    "uglify": "uglifyjs --no-bundle-external public/js/bundle.js -o public/js/bundle.min.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Daniel Zawłocki",

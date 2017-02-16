@@ -61,5 +61,12 @@ Dispatcher.register(action => {
     }
 })
 
+const transformCopyToBook = (copy) => {
+    let book = copy.book
+    book.owners = copy.owners
+
+    return book
+}
+
 module.exports = BooksShelfStore
 

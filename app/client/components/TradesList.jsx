@@ -2,6 +2,7 @@ const React = require('react')
 const TradesActions = require('../actions/TradesActions')
 const TradesStore = require('../stores/TradesStore')
 const AuthStore = require('../stores/AuthStore')
+const { Link } = require('react-router')
 
 class TradesList  extends React.Component {
     constructor(props) {
@@ -36,9 +37,9 @@ class TradesList  extends React.Component {
         const listItems = this.state.trades.map(trade => <TradesListItem key={trade.id} trade={trade} userId={this.state.userId} />)
 
         return (
-            <ul className="list-group">
+            <div className="list-group">
                 {listItems}
-            </ul>
+            </div>
         )
     }
 }
@@ -52,7 +53,7 @@ class TradesListItem extends React.Component {
     render() {
         const trade = this.props.trade
         const userId = this.props.userId
-        const isUserOffer = userId == trade.offerer.userId
+        const isUserOffer = userId == trade.offerer.id
 
         const offererBookTitle = trade.offerer.book ? trade.offerer.book.title : ''
         const receiverBookTitle = trade.receiver.book ? trade.receiver.book.title : ''
@@ -63,7 +64,7 @@ class TradesListItem extends React.Component {
         const text = userBookTitle + ' for ' + otherBookTitle
 
         return (
-            <li className="list-group-item">{ text }</li>
+            <Link className="list-group-item" to={'/trade/' + trade.id}>{ text }</Link>
         )
     }
 }

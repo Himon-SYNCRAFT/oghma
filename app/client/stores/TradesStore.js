@@ -59,14 +59,14 @@ Dispatcher.register(action => {
 })
 
 const apiDataToTrade = trade => {
+    let offerer = trade.offerer || {}
 
-    let offerer = {
-        userId: null,
+    Object.assign(offerer, {
         idCopyOfBook: trade.idCopyOfBookOfferer,
         accept: trade.offererAccept,
         done: trade.offererDone,
         book: null
-    }
+    })
 
     if (trade.offererBook) {
         offerer['book'] = {
@@ -76,17 +76,16 @@ const apiDataToTrade = trade => {
             description: trade.offererBook.book.description,
             isbn: trade.offererBook.book.isbn,
         }
-
-        offerer['userId'] = trade.offererBook.userId
     }
 
-    let receiver = {
-        userId: null,
-        idCopyOfBook: trade.idCopyOfBookReceiver,
+    let receiver = trade.receiver || {}
+
+    Object.assign(receiver, {
+        idCopyOfBook: trade.idCopyOfBookreceiver,
         accept: trade.receiverAccept,
         done: trade.receiverDone,
         book: null
-    }
+    })
 
     if (trade.receiverBook) {
         receiver['book'] = {
@@ -96,17 +95,17 @@ const apiDataToTrade = trade => {
             description: trade.receiverBook.book.description,
             isbn: trade.receiverBook.book.isbn,
         }
-
-        receiver['userId'] = trade.receiverBook.userId
     }
 
-    return {
+    const result = {
         offerer,
         receiver,
         id: trade.id,
         isCanceled: trade.isCanceled,
     }
-}
+    console.log(result);
 
+    return result
+}
 
 module.exports = TradesStore
